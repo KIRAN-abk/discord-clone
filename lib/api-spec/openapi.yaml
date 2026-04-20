@@ -1,0 +1,249 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Discord Clone API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: channels
+    description: Channel operations
+  - name: messages
+    description: Message operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+
+  /channels:
+    get:
+      operationId: listChannels
+      tags: [channels]
+      summary: List all channels
+      responses:
+        "200":
+          description: List of channels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Channel"
+    post:
+      operationId: createChannel
+      tags: [channels]
+      summary: Create a channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChannelBody"
+      responses:
+        "201":
+          description: Channel created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Channel"
+
+  /channels/{channelId}/messages:
+    get:
+      operationId: listMessages
+      tags: [messages]
+      summary: List messages in a channel
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message to a channel
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageBody"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - username
+        - displayName
+        - avatarUrl
+        - createdAt
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        displayName:
+          type: string
+      required:
+        - username
+        - displayName
+
+    Channel:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - createdAt
+
+    CreateChannelBody:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        channelId:
+          type: integer
+        userId:
+          type: integer
+        username:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - content
+        - channelId
+        - userId
+        - username
+        - displayName
+        - avatarUrl
+        - createdAt
+
+    SendMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
